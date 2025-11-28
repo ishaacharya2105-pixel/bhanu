@@ -11,7 +11,7 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, PlusCircle, Sparkles, Wand2 } from 'lucide-react';
+import { Loader2, PlusCircle, Sparkles } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,7 +27,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { useVocabulary } from '@/lib/hooks/use-vocabulary';
 import React from 'react';
-import { getContextualExamples } from '@/app/vocabulary/actions';
+import { getWordDetails } from '@/app/vocabulary/actions';
 
 const formSchema = z.object({
   term: z.string().min(1, 'Term is required.'),
@@ -41,7 +41,7 @@ export function AddWordDialog() {
   const { addWord } = useVocabulary();
   const [open, setOpen] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
-  const [generatedExamples, setGeneratedExamples] = React.useState<string[]>([]);
+
   const form = useForm<AddWordFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,23 +60,19 @@ export function AddWordDialog() {
       ...values,
     });
     form.reset();
-    setGeneratedExamples([]);
     setOpen(false);
   };
   
-  const handleGenerateExamples = async () => {
+  const handleGenerateDetails = async () => {
     if (!termValue) {
-      form.setError("term", { type: "manual", message: "Please enter a term to generate examples." });
+      form.setError("term", { type: "manual", message: "Please enter a term to generate details." });
       return;
     }
     setIsGenerating(true);
-    setGeneratedExamples([]);
-    const result = await getContextualExamples({ word: termValue });
-    if (result.usages) {
-      setGeneratedExamples(result.usages);
-      if (result.usages.length > 0 && !form.getValues('exampleSentence')) {
-        form.setValue('exampleSentence', result.usages[0]);
-      }
+    const result = await getWordDetails({ word: termValue });
+    if (result && !result.error && result.definition && result.exampleSentence) {
+      form.setValue('definition', result.definition);
+      form.setValue('exampleSentence', result.exampleSentence);
     } else {
       // You can use toast to show error
       console.error(result.error);
@@ -85,7 +81,12 @@ export function AddWordDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        form.reset();
+      }
+      setOpen(isOpen);
+    }}>
       <DialogTrigger asChild>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" /> Add New Word
@@ -95,25 +96,33 @@ export function AddWordDialog() {
         <DialogHeader>
           <DialogTitle>Add a New Word</DialogTitle>
           <DialogDescription>
-            Expand your vocabulary by adding a new word with its definition and an
-            example.
+            Expand your vocabulary by adding a new word. You can fill it out manually or use AI to help.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="term"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Term</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Ephemeral" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-2">
+               <FormLabel>Term</FormLabel>
+                <div className="flex items-center space-x-2">
+                    <FormField
+                    control={form.control}
+                    name="term"
+                    render={({ field }) => (
+                        <FormItem className="flex-1">
+                        <FormControl>
+                            <Input placeholder="e.g., Ephemeral" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <Button type="button" variant="outline" size="icon" onClick={handleGenerateDetails} disabled={isGenerating || !termValue}>
+                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin"/> : <Sparkles className="h-4 w-4"/>}
+                        <span className="sr-only">Generate with AI</span>
+                    </Button>
+                </div>
+            </div>
+
             <FormField
               control={form.control}
               name="definition"
@@ -130,40 +139,23 @@ export function AddWordDialog() {
                 </FormItem>
               )}
             />
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <FormLabel>Example Sentence</FormLabel>
-                <Button type="button" variant="outline" size="sm" onClick={handleGenerateExamples} disabled={isGenerating || !termValue}>
-                  {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
-                  AI Generate
-                </Button>
-              </div>
-              <FormField
+            
+            <FormField
                 control={form.control}
                 name="exampleSentence"
                 render={({ field }) => (
-                  <FormItem>
+                    <FormItem>
+                    <FormLabel>Example Sentence</FormLabel>
                     <FormControl>
-                      <Textarea
+                        <Textarea
                         placeholder="e.g., The beauty of the cherry blossoms is ephemeral."
                         {...field}
-                      />
+                        />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
+                    </FormItem>
                 )}
-              />
-              {generatedExamples.length > 0 && (
-                 <div className="space-y-2 rounded-md border bg-muted/50 p-3">
-                   <h4 className="text-sm font-semibold">Suggestions:</h4>
-                    {generatedExamples.map((ex, i) => (
-                       <p key={i} className="text-sm text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => form.setValue('exampleSentence', ex)}>
-                         - {ex}
-                       </p>
-                    ))}
-                 </div>
-              )}
-            </div>
+                />
 
             <DialogFooter>
               <DialogClose asChild>

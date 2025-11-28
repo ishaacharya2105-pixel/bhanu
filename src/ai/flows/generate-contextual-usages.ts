@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   Word: {{{word}}}
   Context: {{#if context}}{{{context}}}{{else}}general{{/if}}
 
-  Generate 3 example sentences using the word in the specified context. Return the sentences as a JSON array.
+  Generate 3 example sentences using the word in the specified context.
   Ensure that the sentences are well-formed and demonstrate different usages of the word.
   `,
 });
