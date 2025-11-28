@@ -13,6 +13,7 @@ import {
   BookText,
   Album,
   ClipboardCheck,
+  Gamepad2,
 } from 'lucide-react';
 
 const navItems = [
@@ -35,6 +36,11 @@ const navItems = [
     href: '/quizzes',
     icon: <ClipboardCheck />,
     label: 'Quizzes',
+  },
+  {
+    href: '/games',
+    icon: <Gamepad2 />,
+    label: 'Games',
   },
 ];
 
