@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "dashboard-welcome",
+      "description": "A person studying with books on a desk with a laptop",
+      "imageUrl": "https://images.unsplash.com/photo-1752920299210-0b727800ea50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxsZWFybmluZyUyMGJvb2tzfGVufDB8fHx8MTc2NDMxNjM5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "learning books"
+    }
+  ]
 }
