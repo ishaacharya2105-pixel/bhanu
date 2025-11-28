@@ -4,11 +4,15 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { VocabularyProvider } from '@/providers/vocabulary-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
+import { Inter, Lexend } from 'next/font/google';
 
 export const metadata: Metadata = {
   title: 'LexiLearn',
   description: 'A modern, engaging vocabulary learning app.',
 };
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const lexend = Lexend({ subsets: ['latin'], variable: '--font-lexend' });
 
 export default function RootLayout({
   children,
@@ -17,19 +21,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className={cn('font-body antialiased min-h-screen')}>
+      <body
+        className={cn(
+          'font-body antialiased min-h-screen dark',
+          inter.variable,
+          lexend.variable
+        )}
+      >
         <VocabularyProvider>
           <AppLayout>{children}</AppLayout>
           <Toaster />

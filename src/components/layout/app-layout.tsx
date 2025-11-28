@@ -14,7 +14,7 @@ import { BookText } from 'lucide-react';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar collapsible="icon" variant="inset" side="left">
         <SidebarHeader>
           <Button variant="ghost" className="h-10 w-full justify-start px-2">
             <BookText className="h-6 w-6 text-primary" />
